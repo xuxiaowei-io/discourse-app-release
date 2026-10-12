@@ -14,4 +14,5 @@
 | <https://bbs.aosc.io>           | 安同社区论坛       | ❌ 不支持 | 此 Discourse 论坛不支持 `.md` 后缀的 API | 2026-10-12 |
 | <https://discuss.kubernetes.io> | Kubernetes 论坛    | ✅ 支持   |                                          | 2026-10-12 |
 | <https://discuss.python.org>    | Python 论坛        | ✅ 支持   |                                          | 2026-10-12 |
+| <https://meta.discourse.org>    | Discourse 官方论坛 | ✅ 支持   |                                          | 2026-10-12 |
 | <https://xuxiaowei.io>          | 徐晓伟论坛         | ✅ 支持   |                                          | 2026-10-12 |
