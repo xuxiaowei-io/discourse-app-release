@@ -15,6 +15,7 @@
 | <https://discuss.elastic.co>              | Elastic 论坛                        | ✅ 支持   |                                          | 2026-10-12 |
 | <https://discuss.kubernetes.io>           | Kubernetes 论坛                     | ✅ 支持   |                                          | 2026-10-12 |
 | <https://discuss.python.org>              | Python 论坛                         | ✅ 支持   |                                          | 2026-10-12 |
+| <https://forum.asana.com>                 | Asana 论坛                          | ❌ 不支持 | 此 Discourse 论坛不支持 `.md` 后缀的 API | 2026-10-12 |
 | <https://forum.gitlab.com>                | GitLab 论坛                         | ❌ 不支持 | 此 Discourse 论坛不支持 `.md` 后缀的 API | 2026-10-12 |
 | <https://forum.suse.org.cn>               | SUSE 中文论坛                       | ❌ 不支持 | 此 Discourse 论坛不支持 `.md` 后缀的 API | 2026-10-12 |
 | <https://forums.rockylinux.org>           | Rocky Linux 论坛                    | ✅ 支持   |                                          | 2026-10-12 |
