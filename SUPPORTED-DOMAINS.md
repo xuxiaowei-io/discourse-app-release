@@ -17,7 +17,7 @@
 | <https://discuss.python.org>              | Python 论坛                         | ✅ 支持   |                                          | 2026-10-12 |
 | <https://forum.asana.com>                 | Asana 论坛                          | ✅ 支持   | 需要 App `0.0.2+` 版本                   | 2026-10-13 |
 | <https://forum.gitlab.com>                | GitLab 论坛                         | ✅ 支持   | 需要 App `0.0.2+` 版本                   | 2026-10-13 |
-| <https://forum.suse.org.cn>               | SUSE 中文论坛                       | ❌ 不支持 | 此 Discourse 论坛不支持 `.md` 后缀的 API | 2026-10-12 |
+| <https://forum.suse.org.cn>               | SUSE 中文论坛                       | ✅ 支持   | 需要 App `0.0.2+` 版本                   | 2026-10-13 |
 | <https://forums.rockylinux.org>           | Rocky Linux 论坛                    | ✅ 支持   |                                          | 2026-10-12 |
 | <https://forums.swift.org>                | Swift 论坛                          | ❌ 不支持 | 此 Discourse 论坛不支持 `.md` 后缀的 API | 2026-10-12 |
 | <https://meta.discourse.org>              | Discourse 官方论坛                  | ✅ 支持   |                                          | 2026-10-12 |
