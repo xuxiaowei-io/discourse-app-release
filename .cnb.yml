@@ -1,8 +1,5 @@
 main:
   imports: https://cnb.cool/xuxiaowei.io/discourse-app-envs/-/blob/main/envs-sync.yml
-  env:
-    GITEE_SYNC_USERNAME: xuxiaowei-com-cn
-    GITHUB_SYNC_USERNAME: xuxiaowei-com-cn
   push:
     - stages:
         - name: sync to gitee
