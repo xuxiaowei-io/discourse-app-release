@@ -1,0 +1,21 @@
+main:
+  imports: https://cnb.cool/xuxiaowei.io/discourse-app-envs/-/blob/main/envs-sync.yml
+  env:
+    GITEE_SYNC_USERNAME: xuxiaowei-com-cn
+    GITHUB_SYNC_USERNAME: xuxiaowei-com-cn
+  push:
+    - stages:
+        - name: sync to gitee
+          image: tencentcom/git-sync
+          settings:
+            target_url: https://gitee.com/xuxiaowei-io/discourse-app-release.git
+            auth_type: https
+            username: ${GITEE_SYNC_USERNAME}
+            password: ${GITEE_SYNC_TOKEN}
+        - name: sync to github
+          image: tencentcom/git-sync
+          settings:
+            target_url: https://github.com/xuxiaowei-io/discourse-app-release.git
+            auth_type: https
+            username: ${GITHUB_SYNC_USERNAME}
+            password: ${GITHUB_SYNC_TOKEN}
