@@ -45,4 +45,5 @@
 | <https://pingkai.cn/tidbcommunity/forum/> | TiDB 社区论坛                       | ✅ 支持   | 需要 App `0.0.2+` 版本                   | 2026-10-13 |
 | <https://platform.jetbrains.com>          | JetBrains 平台社区                  | ✅ 支持   | 需要 App `0.0.2+` 版本                   | 2026-10-13 |
 | <https://users.rust-lang.org>             | Rust 语言论坛                       | ✅ 支持   | 需要 App `0.0.2+` 版本                   | 2026-10-13 |
+| <https://we.opentech.fund>                | 开放技术基金社区                    | ✅ 支持   | 需要 App `0.0.2+` 版本                   | 2026-10-13 |
 | <https://xuxiaowei.io>                    | 徐晓伟论坛（**当前 App 软件作者**） | ✅ 支持   |                                          | 2026-10-12 |
