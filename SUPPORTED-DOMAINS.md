@@ -29,6 +29,7 @@
 | <https://discuss.kubernetes.io>           | Kubernetes 论坛                     | ✅ 支持   |                                          | 2026-10-12 |
 | <https://discuss.python.org>              | Python 论坛                         | ✅ 支持   |                                          | 2026-10-12 |
 | <https://discuss.vllm.ai>                 | vLLM 论坛                           | ✅ 支持   | 需要 App `0.0.2+` 版本                   | 2026-10-13 |
+| <https://discussions.flightaware.com>     | FlightAware 论坛                    | ✅ 支持   | 需要 App `0.0.2+` 版本                   | 2026-10-13 |
 | <https://forum.asana.com>                 | Asana 论坛                          | ✅ 支持   | 需要 App `0.0.2+` 版本                   | 2026-10-13 |
 | <https://forum.gitlab.com>                | GitLab 论坛                         | ✅ 支持   | 需要 App `0.0.2+` 版本                   | 2026-10-13 |
 | <https://forum.suse.org.cn>               | SUSE 中文论坛                       | ✅ 支持   | 需要 App `0.0.2+` 版本                   | 2026-10-13 |
