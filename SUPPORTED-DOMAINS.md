@@ -25,6 +25,7 @@
 | <https://discourse.mozilla.org>           | Mozilla 社区                        | ✅ 支持   | 需要 App `0.0.2+` 版本                   | 2026-10-13 |
 | <https://discourse.threejs.org>           | Three.js 论坛                       | ✅ 支持   | 需要 App `0.0.2+` 版本                   | 2026-10-13 |
 | <https://discuss.elastic.co>              | Elastic 论坛                        | ✅ 支持   |                                          | 2026-10-12 |
+| <https://discuss.gradle.org>              | Gradle 论坛                         | ✅ 支持   | 需要 App `0.0.2+` 版本                   | 2026-10-13 |
 | <https://discuss.kubernetes.io>           | Kubernetes 论坛                     | ✅ 支持   |                                          | 2026-10-12 |
 | <https://discuss.python.org>              | Python 论坛                         | ✅ 支持   |                                          | 2026-10-12 |
 | <https://forum.asana.com>                 | Asana 论坛                          | ✅ 支持   | 需要 App `0.0.2+` 版本                   | 2026-10-13 |
