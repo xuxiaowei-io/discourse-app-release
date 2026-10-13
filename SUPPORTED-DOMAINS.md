@@ -19,7 +19,7 @@
 | <https://forum.gitlab.com>                | GitLab 论坛                         | ✅ 支持   | 需要 App `0.0.2+` 版本                   | 2026-10-13 |
 | <https://forum.suse.org.cn>               | SUSE 中文论坛                       | ✅ 支持   | 需要 App `0.0.2+` 版本                   | 2026-10-13 |
 | <https://forums.rockylinux.org>           | Rocky Linux 论坛                    | ✅ 支持   |                                          | 2026-10-12 |
-| <https://forums.swift.org>                | Swift 论坛                          | ❌ 不支持 | 此 Discourse 论坛不支持 `.md` 后缀的 API | 2026-10-12 |
+| <https://forums.swift.org>                | Swift 论坛                          | ✅ 支持   | 需要 App `0.0.2+` 版本                   | 2026-10-13 |
 | <https://meta.discourse.org>              | Discourse 官方论坛                  | ✅ 支持   |                                          | 2026-10-12 |
 | <https://pingkai.cn/tidbcommunity/forum/> | TiDB 社区论坛                       | ❌ 不支持 | 此 Discourse 论坛不支持 `.md` 后缀的 API | 2026-10-12 |
 | <https://xuxiaowei.io>                    | 徐晓伟论坛（**当前 App 软件作者**） | ✅ 支持   |                                          | 2026-10-12 |
