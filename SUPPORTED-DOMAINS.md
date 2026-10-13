@@ -21,6 +21,7 @@
 | <https://discourse.gohugo.io>             | Hugo 社区                           | ✅ 支持   | 需要 App `0.0.2+` 版本                   | 2026-10-13 |
 | <https://discourse.hanakai.org>           | Hanakai 社区                        | ✅ 支持   | 需要 App `0.0.2+` 版本                   | 2026-10-13 |
 | <https://discourse.haskell.org>           | Haskell 社区                        | ✅ 支持   | 需要 App `0.0.2+` 版本                   | 2026-10-13 |
+| <https://discourse.llvm.org>              | LLVM 论坛                           | ✅ 支持   | 需要 App `0.0.2+` 版本                   | 2026-10-13 |
 | <https://discuss.elastic.co>              | Elastic 论坛                        | ✅ 支持   |                                          | 2026-10-12 |
 | <https://discuss.kubernetes.io>           | Kubernetes 论坛                     | ✅ 支持   |                                          | 2026-10-12 |
 | <https://discuss.python.org>              | Python 论坛                         | ✅ 支持   |                                          | 2026-10-12 |
