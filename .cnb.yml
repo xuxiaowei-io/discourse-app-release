@@ -6,12 +6,20 @@
 # web_trigger 下的 6 条 pipeline 会并发执行（CNB 同一事件下的多条 pipeline 并行），
 # 每条只负责一个目标仓库，互为独立：某个平台失败不会阻塞其它平台。
 
+# 构建节点规格，所有流水线共用：4 核 / 8 GiB。
+# CNB 的内存 = cpus × 2 GiB（https://docs.cnb.cool/zh/build/grammar.md），写 cpus: 4 即同时得到 8 GiB；
+# 这里的同步任务都是网络 IO（git-sync、Release 上传），4 核足够。要调大调小只改这一处。
+.runner: &runner
+  runner:
+    cpus: 4
+
 # 同步发布的公共配置，各目标仓库共用；目标仓库由 RELEASE_SYNC_TARGET 指定，
 # 版本号由 web_trigger 的 inputs（RELEASE_SYNC_TAG，必填）注入。
 # 令牌等敏感变量统一放在 discourse-app-envs 仓库，避免写进本仓库。
 # 前置条件：envs-sync.yml 需提供 CNB_SOURCE_TOKEN（discourse-app 是私有仓库，本仓库是公开仓库，
 # 内置 CNB_TOKEN 只能访问公开仓库）以及各目标平台令牌，详见 .cnb/sync-release.sh 头部说明。
 .release-sync: &release-sync
+  <<: *runner
   docker:
     image: node:22
   imports: https://cnb.cool/xuxiaowei.io/discourse-app-envs/-/blob/main/envs-sync.yml
@@ -21,7 +29,8 @@
 
 main:
   push:
-    - stages:
+    - <<: *runner
+      stages:
         - name: sync to gitee
           image: tencentcom/git-sync
           imports: https://cnb.cool/xuxiaowei.io/discourse-app-envs/-/blob/main/envs-sync.yml
