@@ -1,7 +1,7 @@
 # 本仓库的两类流水线：
 #   1. push：代码同步，把 main 分支代码推送到 5 个镜像仓库（保留原有配置）；
 #   2. web_trigger：手动同步发布，把源仓库 discourse-app 指定版本的 Release（发布说明 + 附件）
-#      同步到本仓库与 5 个镜像仓库。按钮与「版本号」输入见 .cnb/web_trigger.yml。
+#      同步到本仓库与 5 个镜像仓库。按钮与输入（版本号、同步目标、GitHub latest）见 .cnb/web_trigger.yml。
 #
 # web_trigger 下的 6 条 pipeline 会并发执行（CNB 同一事件下的多条 pipeline 并行），
 # 每条只负责一个目标仓库，互为独立：某个平台失败不会阻塞其它平台。

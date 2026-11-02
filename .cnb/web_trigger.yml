@@ -44,3 +44,19 @@ branch:
                 value: gitlink
               - name: GitCode
                 value: gitcode
+          # 仅 GitHub 目标生效：同步过去的发布是否设为 latest（对应 publish-apk 的 --make-latest）。
+          # 默认「按源发布」= 沿用 discourse-app 里该发布的 is_latest；脚本会把 source 翻译成「不传该参数」，
+          # 其它目标（CNB / Gitee / GitLab / GitLink / GitCode）用不到这个字段，脚本会直接清掉。
+          RELEASE_SYNC_MAKE_LATEST:
+            name: GitHub latest
+            description: 目标为 GitHub 时，是否把同步过去的发布设为 latest；对其它目标无影响
+            type: select
+            required: true
+            default: "source"
+            options:
+              - name: 按源发布（默认）
+                value: source
+              - name: 设为 latest
+                value: "true"
+              - name: 不设为 latest
+                value: "false"

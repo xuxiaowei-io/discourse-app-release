@@ -23,6 +23,9 @@
 #   PUBLISH_APK_TARBALL   npm 安装失败时的 GitHub tag 安装地址（不设置时按实际版本自动拼接）
 #   RELEASE_SYNC_PACKAGE_NAME
 #                         目标为 GitLab 时的 Generic Package 名称，默认 discourse-app
+#   RELEASE_SYNC_MAKE_LATEST
+#                         仅目标为 GitHub 时生效：true / false 覆盖发布的 make_latest；
+#                         不设置（或 web_trigger 选的 source）= 按源发布的 is_latest
 #   RELEASE_SYNC_ARGS     追加给 release-sync 的参数（如 "--dry-run --verbose"），可选
 #
 # 令牌（不写进本仓库，由 .cnb.yml 的 imports 从 discourse-app-envs 引入；只走环境变量）：
@@ -135,6 +138,21 @@ if [ "$platform" = 'GitLab' ]; then
   esac
 fi
 
+# GitHub 目标的 latest 控制（publish-apk 0.0.1-alpha.26 起支持 --make-latest / RELEASE_SYNC_MAKE_LATEST）。
+# publish-apk 从环境变量读该值，这里只负责把 web_trigger 的取值翻译成它能理解的形式：
+#   source / 未设置 → 不传，按源发布的 is_latest；
+#   true / false    → 原样透传；
+# 其它平台不支持 make_latest，直接清掉，避免 publish-apk 因「目标平台不支持该参数」报错。
+if [ "$platform" = 'GitHub' ]; then
+  case "${RELEASE_SYNC_MAKE_LATEST:-source}" in
+    source) unset RELEASE_SYNC_MAKE_LATEST ;;
+    true|false) ;;
+    *) fail "RELEASE_SYNC_MAKE_LATEST 只能是 true / false / source，实际: ${RELEASE_SYNC_MAKE_LATEST}" ;;
+  esac
+else
+  unset RELEASE_SYNC_MAKE_LATEST
+fi
+
 # release-sync 自己也会读通用环境变量；这里统一导出，避免把令牌放进命令行参数。
 export RELEASE_SYNC_SOURCE_TOKEN="$source_token"
 export RELEASE_SYNC_TARGET_TOKEN="$target_token"
@@ -150,6 +168,9 @@ log "目标平台: ${platform}"
 log "publish-apk: ${PUBLISH_APK_VERSION}"
 if [ "$platform" = 'GitLab' ]; then
   log "GitLab 软件包名: ${package_name}"
+fi
+if [ "$platform" = 'GitHub' ]; then
+  log "GitHub latest: ${RELEASE_SYNC_MAKE_LATEST-按源发布（不覆盖）}"
 fi
 log ''
 
