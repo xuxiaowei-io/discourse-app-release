@@ -1,0 +1,25 @@
+# 手动同步发布按钮：配置在「代码 → 分支详情页」右上角。
+# 文档：https://docs.cnb.cool/zh/build/web-trigger.html
+#
+# 点击按钮触发 .cnb.yml 中的 web_trigger 事件；该事件下的 6 条 pipeline 会并行执行，
+# 分别把源仓库 discourse-app 的指定版本发布同步到 CNB / Gitee / GitLab / GitHub /
+# GitLink / GitCode 六个仓库。
+#
+# 仅 main 分支显示按钮：web_trigger 读取的是「被点击分支」上的 .cnb.yml，
+# 限定 main 可避免用其它分支的旧配置触发同步。
+branch:
+  - reg: "^main$"
+    buttons:
+      - name: 同步发布
+        description: 把 discourse-app 的指定版本发布（说明 + 附件）并行同步到 6 个仓库
+        event: web_trigger
+        # 只有一个按钮时设为默认：点按钮直接弹出触发弹框
+        isDefault: true
+        inputs:
+          # 变量名即注入流水线的环境变量名；必填，不提供「同步最新发布」的默认行为。
+          RELEASE_SYNC_TAG:
+            name: 版本号
+            description: 要同步的发布 tag，必须与源仓库 discourse-app 的 Release 一致
+            type: input
+            required: true
+            placeholder: "例如 v0.0.2"

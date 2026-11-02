@@ -1,3 +1,24 @@
+# 本仓库的两类流水线：
+#   1. push：代码同步，把 main 分支代码推送到 5 个镜像仓库（保留原有配置）；
+#   2. web_trigger：手动同步发布，把源仓库 discourse-app 指定版本的 Release（发布说明 + 附件）
+#      同步到本仓库与 5 个镜像仓库。按钮与「版本号」输入见 .cnb/web_trigger.yml。
+#
+# web_trigger 下的 6 条 pipeline 会并发执行（CNB 同一事件下的多条 pipeline 并行），
+# 每条只负责一个目标仓库，互为独立：某个平台失败不会阻塞其它平台。
+
+# 同步发布的公共配置，各目标仓库共用；目标仓库由 RELEASE_SYNC_TARGET 指定，
+# 版本号由 web_trigger 的 inputs（RELEASE_SYNC_TAG，必填）注入。
+# 令牌等敏感变量统一放在 discourse-app-envs 仓库，避免写进本仓库。
+# 前置条件：envs-sync.yml 需提供 CNB_SOURCE_TOKEN（discourse-app 是私有仓库，本仓库是公开仓库，
+# 内置 CNB_TOKEN 只能访问公开仓库）以及各目标平台令牌，详见 README。
+.release-sync: &release-sync
+  docker:
+    image: node:22
+  imports: https://cnb.cool/xuxiaowei.io/discourse-app-envs/-/blob/main/envs-sync.yml
+  stages:
+    - name: 同步发布
+      script: bash .cnb/sync-release.sh "${RELEASE_SYNC_TARGET}"
+
 main:
   push:
     - stages:
@@ -41,3 +62,31 @@ main:
             auth_type: https
             username: ${GITCODE_SYNC_USERNAME}
             password: ${GITCODE_SYNC_TOKEN}
+
+  # 手动触发（页面按钮，见 .cnb/web_trigger.yml）。
+  # 6 条 pipeline 并发执行；版本号由 inputs 注入，缺少版本号时 .cnb/sync-release.sh 会直接失败。
+  web_trigger:
+    - <<: *release-sync
+      name: 同步到 CNB
+      env:
+        RELEASE_SYNC_TARGET: https://cnb.cool/xuxiaowei.io/discourse-app-release
+    - <<: *release-sync
+      name: 同步到 Gitee
+      env:
+        RELEASE_SYNC_TARGET: https://gitee.com/xuxiaowei-io/discourse-app-release
+    - <<: *release-sync
+      name: 同步到 GitLab
+      env:
+        RELEASE_SYNC_TARGET: https://gitlab.com/xuxiaowei-io/discourse-app-release
+    - <<: *release-sync
+      name: 同步到 GitHub
+      env:
+        RELEASE_SYNC_TARGET: https://github.com/xuxiaowei-io/discourse-app-release
+    - <<: *release-sync
+      name: 同步到 GitLink
+      env:
+        RELEASE_SYNC_TARGET: https://gitlink.org.cn/xuxiaowei-io/discourse-app-release
+    - <<: *release-sync
+      name: 同步到 GitCode
+      env:
+        RELEASE_SYNC_TARGET: https://gitcode.com/xuxiaowei-io/discourse-app-release
