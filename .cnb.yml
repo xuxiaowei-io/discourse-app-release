@@ -10,7 +10,7 @@
 # 版本号由 web_trigger 的 inputs（RELEASE_SYNC_TAG，必填）注入。
 # 令牌等敏感变量统一放在 discourse-app-envs 仓库，避免写进本仓库。
 # 前置条件：envs-sync.yml 需提供 CNB_SOURCE_TOKEN（discourse-app 是私有仓库，本仓库是公开仓库，
-# 内置 CNB_TOKEN 只能访问公开仓库）以及各目标平台令牌，详见 README。
+# 内置 CNB_TOKEN 只能访问公开仓库）以及各目标平台令牌，详见 .cnb/sync-release.sh 头部说明。
 .release-sync: &release-sync
   docker:
     image: node:22
@@ -78,6 +78,9 @@ main:
       name: 同步到 GitLab
       env:
         RELEASE_SYNC_TARGET: https://gitlab.com/xuxiaowei-io/discourse-app-release
+        # GitLab 目标上传到 Generic Package Registry（路径 discourse-app/<tag>/<file>），
+        # 再创建指向通用包的 Release Link；该名称必须显式指定（ec05bdfe 起为必填）。
+        RELEASE_SYNC_PACKAGE_NAME: discourse-app
     - <<: *release-sync
       name: 同步到 GitHub
       env:

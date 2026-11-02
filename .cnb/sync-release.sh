@@ -16,7 +16,10 @@
 # 环境变量：
 #   RELEASE_SYNC_TAG      版本号，必填；必须是源仓库真实存在的 Release tag
 #   RELEASE_SYNC_SOURCE   源仓库，默认 https://cnb.cool/xuxiaowei.io/discourse-app
-#   PUBLISH_APK_VERSION   使用的 publish-apk 版本，默认 0.0.1-alpha.22
+#   PUBLISH_APK_VERSION   使用的 publish-apk 版本，默认 0.0.1-alpha.23
+#   PUBLISH_APK_TARBALL   npm 上取不到该版本时的 GitHub tag 安装地址（默认按版本自动拼接）
+#   RELEASE_SYNC_PACKAGE_NAME
+#                         目标为 GitLab 时的 Generic Package 名称，默认 discourse-app
 #   RELEASE_SYNC_ARGS     追加给 release-sync 的参数（如 "--dry-run --verbose"），可选
 #
 # 令牌（不写进本仓库，由 .cnb.yml 的 imports 从 discourse-app-envs 引入；只走环境变量）：
@@ -26,13 +29,15 @@
 #   目标仓库按平台读取（前一个优先）：
 #     CNB     CNB_TARGET_TOKEN / CNB_TOKEN
 #     Gitee   GITEE_TARGET_TOKEN / GITEE_SYNC_TOKEN
-#     GitLab  GITLAB_TARGET_TOKEN / GITLAB_SYNC_TOKEN
+#     GitLab  GITLAB_TARGET_TOKEN / GITLAB_SYNC_TOKEN（需要 api，含 Package Registry 写权限）
 #     GitHub  GITHUB_TARGET_TOKEN / GITHUB_SYNC_TOKEN
 #     GitLink GITLINK_TARGET_TOKEN / GITLINK_SYNC_TOKEN
 #     GitCode GITCODE_TARGET_TOKEN / GITCODE_SYNC_TOKEN
 #
 # 说明：
 #   - 版本号必填，不提供「同步最新发布」的默认行为，避免误同步；
+#   - GitLab 目标把附件上传到 Generic Package Registry，再创建指向通用包的 Release Link；
+#     同名 package file 先删除后上传，软件包名默认 discourse-app、版本为发布 tag；
 #   - publish-apk 固定版本安装到临时目录后执行，不污染工作区；
 #   - 令牌只作为环境变量传给子进程，不出现在命令行参数与日志里。
 set -euo pipefail
@@ -40,7 +45,8 @@ set -euo pipefail
 SOURCE_REPO="${RELEASE_SYNC_SOURCE:-https://cnb.cool/xuxiaowei.io/discourse-app}"
 TARGET_REPO="${1:-${RELEASE_SYNC_TARGET:-}}"
 TAG="${2:-${RELEASE_SYNC_TAG:-}}"
-PUBLISH_APK_VERSION="${PUBLISH_APK_VERSION:-0.0.1-alpha.22}"
+PUBLISH_APK_VERSION="${PUBLISH_APK_VERSION:-0.0.1-alpha.23}"
+PUBLISH_APK_TARBALL="${PUBLISH_APK_TARBALL:-https://codeload.github.com/xuxiaowei-io/publish-apk/tar.gz/refs/tags/v${PUBLISH_APK_VERSION}}"
 
 log() { printf '%s\n' "$*"; }
 fail() {
@@ -99,6 +105,15 @@ if [ -z "${CNB_SOURCE_TOKEN:-}${CNB_RELEASE_TOKEN:-}${CNB_SYNC_TOKEN:-}" ]; then
 fi
 [ -n "$target_token" ] || fail "缺少 ${platform} 目标令牌：请设置 ${target_token_hint}"
 
+# GitLab 目标从 ec05bdfe 起必须指定 Generic Package 名称；版本使用发布 tag。
+package_name=''
+if [ "$platform" = 'GitLab' ]; then
+  package_name="${RELEASE_SYNC_PACKAGE_NAME:-discourse-app}"
+  case "$package_name" in
+    *[[:space:]]*) fail "GitLab 软件包名不能包含空白字符: ${package_name}" ;;
+  esac
+fi
+
 # release-sync 自己也会读通用环境变量；这里统一导出，避免把令牌放进命令行参数。
 export RELEASE_SYNC_SOURCE_TOKEN="$source_token"
 export RELEASE_SYNC_TARGET_TOKEN="$target_token"
@@ -112,16 +127,30 @@ log "目标仓库: ${TARGET_REPO}"
 log "版本号: ${TAG}"
 log "目标平台: ${platform}"
 log "publish-apk: ${PUBLISH_APK_VERSION}"
+if [ "$platform" = 'GitLab' ]; then
+  log "GitLab 软件包名: ${package_name}"
+fi
 log ''
 
 # 固定版本安装，避免 npx 命中全局旧版本或 latest 尚未包含 release-sync 的情况。
-npm install \
+# 优先走 npm；alpha.23 等版本尚未出现在 npm 上时（staged publish 待批准），
+# 回退到同名 GitHub tag 的源码包，保证 GitLab Generic Package 上传能力可用。
+if ! npm install \
   --prefix "$install_dir" \
   --no-save \
   --no-audit \
   --no-fund \
   --loglevel=error \
-  "publish-apk@${PUBLISH_APK_VERSION}"
+  "publish-apk@${PUBLISH_APK_VERSION}" >/dev/null 2>&1; then
+  log "npm 上暂未取到 publish-apk@${PUBLISH_APK_VERSION}，改从 GitHub tag 安装"
+  npm install \
+    --prefix "$install_dir" \
+    --no-save \
+    --no-audit \
+    --no-fund \
+    --loglevel=error \
+    "$PUBLISH_APK_TARBALL"
+fi
 
 extra_args=()
 if [ -n "${RELEASE_SYNC_ARGS:-}" ]; then
@@ -134,6 +163,9 @@ cmd=(
   --target "$TARGET_REPO"
   --tag "$TAG"
 )
+if [ "$platform" = 'GitLab' ]; then
+  cmd+=(--package-name "$package_name")
+fi
 if [ "${#extra_args[@]}" -gt 0 ]; then
   cmd+=("${extra_args[@]}")
 fi
