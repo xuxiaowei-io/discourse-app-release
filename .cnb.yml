@@ -64,20 +64,24 @@ main:
             password: ${GITCODE_SYNC_TOKEN}
 
   # 手动触发（页面按钮，见 .cnb/web_trigger.yml）。
-  # 6 条 pipeline 并发执行；版本号由 inputs 注入，缺少版本号时 .cnb/sync-release.sh 会直接失败。
+  # 6 条 pipeline 并发执行；只同步 RELEASE_SYNC_TARGETS 中选中的目标，
+  # 未选中的目标在 .cnb/sync-release.sh 入口直接跳过；版本号必填。
   web_trigger:
     - <<: *release-sync
       name: 同步到 CNB
       env:
         RELEASE_SYNC_TARGET: https://cnb.cool/xuxiaowei.io/discourse-app-release
+        RELEASE_SYNC_TARGET_KEY: cnb
     - <<: *release-sync
       name: 同步到 Gitee
       env:
         RELEASE_SYNC_TARGET: https://gitee.com/xuxiaowei-io/discourse-app-release
+        RELEASE_SYNC_TARGET_KEY: gitee
     - <<: *release-sync
       name: 同步到 GitLab
       env:
         RELEASE_SYNC_TARGET: https://gitlab.com/xuxiaowei-io/discourse-app-release
+        RELEASE_SYNC_TARGET_KEY: gitlab
         # GitLab 目标上传到 Generic Package Registry（路径 discourse-app/<tag>/<file>），
         # 再创建指向通用包的 Release Link；该名称必须显式指定（ec05bdfe 起为必填）。
         RELEASE_SYNC_PACKAGE_NAME: discourse-app
@@ -85,11 +89,14 @@ main:
       name: 同步到 GitHub
       env:
         RELEASE_SYNC_TARGET: https://github.com/xuxiaowei-io/discourse-app-release
+        RELEASE_SYNC_TARGET_KEY: github
     - <<: *release-sync
       name: 同步到 GitLink
       env:
         RELEASE_SYNC_TARGET: https://gitlink.org.cn/xuxiaowei-io/discourse-app-release
+        RELEASE_SYNC_TARGET_KEY: gitlink
     - <<: *release-sync
       name: 同步到 GitCode
       env:
         RELEASE_SYNC_TARGET: https://gitcode.com/xuxiaowei-io/discourse-app-release
+        RELEASE_SYNC_TARGET_KEY: gitcode

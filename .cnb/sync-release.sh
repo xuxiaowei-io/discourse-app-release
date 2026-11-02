@@ -16,7 +16,10 @@
 # 环境变量：
 #   RELEASE_SYNC_TAG      版本号，必填；必须是源仓库真实存在的 Release tag
 #   RELEASE_SYNC_SOURCE   源仓库，默认 https://cnb.cool/xuxiaowei.io/discourse-app
-#   PUBLISH_APK_VERSION   使用的 publish-apk 版本，默认 0.0.1-alpha.23
+#   RELEASE_SYNC_TARGETS  选中的目标，分号分隔（cnb;gitee;gitlab;...）；未设置时默认全选
+#   RELEASE_SYNC_TARGET_KEY
+#                         当前 pipeline 对应的目标标识；未设置时不做选择过滤（本地执行）
+#   PUBLISH_APK_VERSION   使用的 publish-apk 版本，默认 0.0.1-alpha.24
 #   PUBLISH_APK_TARBALL   npm 上取不到该版本时的 GitHub tag 安装地址（默认按版本自动拼接）
 #   RELEASE_SYNC_PACKAGE_NAME
 #                         目标为 GitLab 时的 Generic Package 名称，默认 discourse-app
@@ -36,6 +39,7 @@
 #
 # 说明：
 #   - 版本号必填，不提供「同步最新发布」的默认行为，避免误同步；
+#   - 同步目标可多选、默认全选；未选中的目标在脚本入口直接跳过；
 #   - GitLab 目标把附件上传到 Generic Package Registry，再创建指向通用包的 Release Link；
 #     同名 package file 先删除后上传，软件包名默认 discourse-app、版本为发布 tag；
 #   - publish-apk 固定版本安装到临时目录后执行，不污染工作区；
@@ -45,7 +49,7 @@ set -euo pipefail
 SOURCE_REPO="${RELEASE_SYNC_SOURCE:-https://cnb.cool/xuxiaowei.io/discourse-app}"
 TARGET_REPO="${1:-${RELEASE_SYNC_TARGET:-}}"
 TAG="${2:-${RELEASE_SYNC_TAG:-}}"
-PUBLISH_APK_VERSION="${PUBLISH_APK_VERSION:-0.0.1-alpha.23}"
+PUBLISH_APK_VERSION="${PUBLISH_APK_VERSION:-0.0.1-alpha.24}"
 PUBLISH_APK_TARBALL="${PUBLISH_APK_TARBALL:-https://codeload.github.com/xuxiaowei-io/publish-apk/tar.gz/refs/tags/v${PUBLISH_APK_VERSION}}"
 
 log() { printf '%s\n' "$*"; }
@@ -59,6 +63,22 @@ fail() {
 case "$TAG" in
   *[[:space:]]*) fail "版本号不能包含空白字符: $TAG" ;;
 esac
+
+# web_trigger 会注入 RELEASE_SYNC_TARGETS（分号分隔，默认全选）；未选中的目标直接跳过。
+# 本地执行不设置 RELEASE_SYNC_TARGET_KEY，因此不做选择过滤。
+TARGET_KEY="${RELEASE_SYNC_TARGET_KEY:-}"
+if [ -n "$TARGET_KEY" ]; then
+  case "$TARGET_KEY" in
+    cnb|gitee|gitlab|github|gitlink|gitcode) ;;
+    *) fail "未知的同步目标标识: ${TARGET_KEY}" ;;
+  esac
+  selected_targets="${RELEASE_SYNC_TARGETS:-cnb;gitee;gitlab;github;gitlink;gitcode}"
+  selected_targets="${selected_targets//,/;}"
+  case ";${selected_targets};" in
+    *";${TARGET_KEY};"*) ;;
+    *) log "未选择目标 ${TARGET_KEY}，跳过同步"; exit 0 ;;
+  esac
+fi
 
 # 按目标仓库域名选择令牌；新增平台时在这里补一条。
 case "$TARGET_REPO" in
