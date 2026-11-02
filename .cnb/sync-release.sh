@@ -19,8 +19,8 @@
 #   RELEASE_SYNC_TARGETS  选中的目标，分号分隔（cnb;gitee;gitlab;...）；未设置时默认全选
 #   RELEASE_SYNC_TARGET_KEY
 #                         当前 pipeline 对应的目标标识；未设置时不做选择过滤（本地执行）
-#   PUBLISH_APK_VERSION   使用的 publish-apk 版本，默认 0.0.1-alpha.24
-#   PUBLISH_APK_TARBALL   npm 上取不到该版本时的 GitHub tag 安装地址（默认按版本自动拼接）
+#   PUBLISH_APK_VERSION   使用的 publish-apk npm 版本或 dist-tag，默认 alpha（始终取最新 alpha 发布）
+#   PUBLISH_APK_TARBALL   npm 安装失败时的 GitHub tag 安装地址（不设置时按实际版本自动拼接）
 #   RELEASE_SYNC_PACKAGE_NAME
 #                         目标为 GitLab 时的 Generic Package 名称，默认 discourse-app
 #   RELEASE_SYNC_ARGS     追加给 release-sync 的参数（如 "--dry-run --verbose"），可选
@@ -42,15 +42,16 @@
 #   - 同步目标可多选、默认全选；未选中的目标在脚本入口直接跳过；
 #   - GitLab 目标把附件上传到 Generic Package Registry，再创建指向通用包的 Release Link；
 #     同名 package file 先删除后上传，软件包名默认 discourse-app、版本为发布 tag；
-#   - publish-apk 固定版本安装到临时目录后执行，不污染工作区；
+#   - publish-apk 以 alpha dist-tag 安装到临时目录后执行，不污染工作区；
 #   - 令牌只作为环境变量传给子进程，不出现在命令行参数与日志里。
 set -euo pipefail
 
 SOURCE_REPO="${RELEASE_SYNC_SOURCE:-https://cnb.cool/xuxiaowei.io/discourse-app}"
 TARGET_REPO="${1:-${RELEASE_SYNC_TARGET:-}}"
 TAG="${2:-${RELEASE_SYNC_TAG:-}}"
-PUBLISH_APK_VERSION="${PUBLISH_APK_VERSION:-0.0.1-alpha.24}"
-PUBLISH_APK_TARBALL="${PUBLISH_APK_TARBALL:-https://codeload.github.com/xuxiaowei-io/publish-apk/tar.gz/refs/tags/v${PUBLISH_APK_VERSION}}"
+PUBLISH_APK_VERSION="${PUBLISH_APK_VERSION:-alpha}"
+# 默认不写死 tarball：dist-tag 拼不出 GitHub tag，npm 安装失败时再按实际版本号推导。
+PUBLISH_APK_TARBALL="${PUBLISH_APK_TARBALL:-}"
 
 log() { printf '%s\n' "$*"; }
 fail() {
@@ -152,9 +153,8 @@ if [ "$platform" = 'GitLab' ]; then
 fi
 log ''
 
-# 固定版本安装，避免 npx 命中全局旧版本或 latest 尚未包含 release-sync 的情况。
-# 优先走 npm；alpha.23 等版本尚未出现在 npm 上时（staged publish 待批准），
-# 回退到同名 GitHub tag 的源码包，保证 GitLab Generic Package 上传能力可用。
+# 安装到临时目录，避免 npx 命中全局旧版本；默认按 alpha dist-tag 安装，
+# 始终取最新的 alpha 发布。需要复现某个具体版本时，把 PUBLISH_APK_VERSION 设为精确版本号即可。
 if ! npm install \
   --prefix "$install_dir" \
   --no-save \
@@ -162,14 +162,26 @@ if ! npm install \
   --no-fund \
   --loglevel=error \
   "publish-apk@${PUBLISH_APK_VERSION}" >/dev/null 2>&1; then
-  log "npm 上暂未取到 publish-apk@${PUBLISH_APK_VERSION}，改从 GitHub tag 安装"
+  # 兜底走 GitHub tag 的源码包（发布刚打 tag、npm 上暂时取不到时仍可用）。
+  # dist-tag 拼不出 tag 地址，先解析成实际版本号；传的是精确版本号就直接用。
+  tarball="${PUBLISH_APK_TARBALL}"
+  if [ -z "$tarball" ]; then
+    case "$PUBLISH_APK_VERSION" in
+      [0-9]*.[0-9]*.[0-9]*) tarball_version="$PUBLISH_APK_VERSION" ;;
+      *) tarball_version="$(npm view "publish-apk@${PUBLISH_APK_VERSION}" version 2>/dev/null || true)" ;;
+    esac
+    [ -n "$tarball_version" ] \
+      || fail "npm 上取不到 publish-apk@${PUBLISH_APK_VERSION}，也无法解析出对应的 GitHub tag；可显式设置 PUBLISH_APK_TARBALL"
+    tarball="https://codeload.github.com/xuxiaowei-io/publish-apk/tar.gz/refs/tags/v${tarball_version}"
+  fi
+  log "npm 安装 publish-apk@${PUBLISH_APK_VERSION} 失败，改从 ${tarball} 安装"
   npm install \
     --prefix "$install_dir" \
     --no-save \
     --no-audit \
     --no-fund \
     --loglevel=error \
-    "$PUBLISH_APK_TARBALL"
+    "$tarball"
 fi
 
 extra_args=()
